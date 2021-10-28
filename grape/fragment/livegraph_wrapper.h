@@ -52,21 +52,21 @@ class LiveGraphWrapper {
  public:
   using internal_vertex_t = internal::Vertex<VID_T, VDATA_T>;
   using edge_t = Edge<VID_T, EDATA_T>;
-  using nbr_t = Nbr<VID_T, EDATA_T>;
+  // using nbr_t = Nbr<VID_T, EDATA_T>;
   using vertex_t = Vertex<VID_T>;
-  using const_adj_list_t = ConstAdjList<VID_T, EDATA_T>;
-  using adj_list_t = LiveGraphAdjList<VID_T>;
+  // using const_adj_list_t = ConstAdjList<VID_T, EDATA_T>;
+  // using adj_list_t = LiveGraphAdjList<VID_T>;
   using vid_t = VID_T;
   using oid_t = OID_T;
   using vdata_t = VDATA_T;
   using edata_t = EDATA_T;
-  using vertex_range_t = VertexRange<vid_t>;
-  template <typename DATA_T>
-  using vertex_array_t = VertexArray<DATA_T, vid_t>;
-  using vertex_map_t = GlobalVertexMap<oid_t, vid_t>;
+  // using vertex_range_t = VertexRange<vid_t>;
+  // template <typename DATA_T>
+  // using vertex_array_t = VertexArray<DATA_T, vid_t>;
+  // using vertex_map_t = GlobalVertexMap<oid_t, vid_t>;
 
-  using IsEdgeCut = std::true_type;
-  using IsVertexCut = std::false_type;
+  // using IsEdgeCut = std::true_type;
+  // using IsVertexCut = std::false_type;
 
   LiveGraphWrapper() = default;
 
@@ -80,27 +80,17 @@ class LiveGraphWrapper {
     LOG(INFO) << "Init livegraph wrapper";
   }
 
-  template <typename IOADAPTOR_T>
-  void Serialize(const std::string& prefix) {
-    LOG(INFO) << "Serializing";
-  }
-
-  template <typename IOADAPTOR_T>
-  void Deserialize(const std::string& prefix, const fid_t fid) {
-    LOG(INFO) << "Deserialize";
-  }
-
   void PrepareToRunApp(MessageStrategy strategy, bool need_split_edges) {
-    if (strategy == MessageStrategy::kAlongEdgeToOuterVertex ||
-        strategy == MessageStrategy::kAlongIncomingEdgeToOuterVertex ||
-        strategy == MessageStrategy::kAlongOutgoingEdgeToOuterVertex) {
-      initMessageDestination(strategy);
-    }
+    // if (strategy == MessageStrategy::kAlongEdgeToOuterVertex ||
+    //     strategy == MessageStrategy::kAlongIncomingEdgeToOuterVertex ||
+    //     strategy == MessageStrategy::kAlongOutgoingEdgeToOuterVertex) {
+    //   initMessageDestination(strategy);
+    // }
 
-    if (need_split_edges) {
-      initEdgesSplitter(ieoffset_, iespliters_);
-      initEdgesSplitter(oeoffset_, oespliters_);
-    }
+    // if (need_split_edges) {
+    //   initEdgesSplitter(ieoffset_, iespliters_);
+    //   initEdgesSplitter(oeoffset_, oespliters_);
+    // }
   }
 
   inline fid_t fid() { return 0; }
@@ -154,31 +144,34 @@ class LiveGraphWrapper {
   inline VID_T GetOuterVerticesNum() { return 0; }
 
  public:
-  /**
-   * @brief Returns the incoming adjacent vertices of v.
-   *
-   * @param v Input vertex.
-   *
-   * @return The incoming adjacent vertices of v.
-   *
-   * @attention Only inner vertex is available.
-   */
-  inline adj_list_t GetIncomingAdjList(const vertex_t& v) {
-    return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
-  }
+  // /**
+  //  * @brief Returns the incoming adjacent vertices of v.
+  //  *
+  //  * @param v Input vertex.
+  //  *
+  //  * @return The incoming adjacent vertices of v.
+  //  *
+  //  * @attention Only inner vertex is available.
+  //  */
+  // inline adj_list_t GetIncomingAdjList(const vertex_t& v) {
+  //   return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
+  // }
 
-  /**
-   * @brief Returns the outgoing adjacent vertices of v.
-   *
-   * @param v Input vertex.
-   *
-   * @return The outgoing adjacent vertices of v.
-   *
-   * @attention Only inner vertex is available.
-   */
-  inline adj_list_t GetOutgoingAdjList(const vertex_t& v) {
-    // return adj_list_t(oeoffset_[v.GetValue()], oeoffset_[v.GetValue() + 1]);
-    return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
+  // /**
+  //  * @brief Returns the outgoing adjacent vertices of v.
+  //  *
+  //  * @param v Input vertex.
+  //  *
+  //  * @return The outgoing adjacent vertices of v.
+  //  *
+  //  * @attention Only inner vertex is available.
+  //  */
+  // inline adj_list_t GetOutgoingAdjList(const vertex_t& v) {
+  //   // return adj_list_t(oeoffset_[v.GetValue()], oeoffset_[v.GetValue() +
+  //   1]); return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
+  // }
+  gl::EdgeIterator GetEdgeIterator(const vertex_t& v) {
+    return transaction_.get_edges(v.GetValue(), 0);
   }
 
  private:
