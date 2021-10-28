@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "grape/graph/edge.h"
 #include "grape/utils/vertex_array.h"
+// #include "livegraph.hpp"
 
 namespace grape {
 
@@ -65,6 +66,51 @@ struct Nbr {
   Vertex<VID_T> neighbor;
   EDATA_T data;
 };
+
+// /**
+//  * @brief A neighbor of a vertex in the graph.
+//  *
+//  * Assume an edge, vertex_a --(edge_data)--> vertex_b.
+//  * a <Nbr> of vertex_a stores <Vertex> b and the edge_data.
+//  *
+//  * @tparam VID_T
+//  * @tparam EDATA_T
+//  */
+// template <typename VID_T>
+// struct LiveGraphNbr {
+//   LiveGraphNbr() : neighbor(), data() {}
+//   explicit LiveGraphNbr(const VID_T& nbr_) : neighbor(nbr_), data() {}
+//   explicit LiveGraphNbr(const Vertex<VID_T>& nbr_) : neighbor(nbr_), data()
+//   {} LiveGraphNbr(const LiveGraphNbr& rhs)
+//       : neighbor(rhs.neighbor), data(rhs.data) {}
+//   LiveGraphNbr(const VID_T& nbr_, const EDATA_T& data_)
+//       : neighbor(nbr_), data(data_) {}
+//   LiveGraphNbr(const Vertex<VID_T>& nbr_, const EDATA_T& data_)
+//       : neighbor(nbr_), data(data_) {}
+//   ~LiveGraphNbr() {}
+
+//   LiveGraphNbr& operator=(const LiveGraphNbr& rhs) {
+//     neighbor = rhs.neighbor;
+//     data = rhs.data;
+//     return *this;
+//   }
+
+//   void GetEdgeSrc(const Edge<VID_T, EDATA_T>& edge) {
+//     neighbor.SetValue(edge.src());
+//     data = edge.edata();
+//   }
+
+//   void GetEdgeDst(const Edge<VID_T, EDATA_T>& edge) {
+//     neighbor.SetValue(edge.dst());
+//     data = edge.edata();
+//   }
+
+//   Vertex<VID_T> get_neighbor() const { return neighbor; }
+//   EDATA_T get_data() const { return data; }
+
+//   Vertex<VID_T> neighbor;
+//   EDATA_T data;
+// };
 
 /**
  * @brief A neighbor of a vertex in the graph. (partial specialization with
@@ -333,6 +379,40 @@ class ConstAdjList {
   const NbrT* begin_;
   const NbrT* end_;
 };
+
+// /**
+//  * @brief A iteratable adjencent list of a vertex. The list contains all
+//  * neighbors in format of Nbr, which contains the other Node and the data on
+//  the
+//  * Edge.
+//  *
+//  * @tparam VID_T
+//  * @tparam EDATA_T
+//  */
+// template <typename VID_T>
+// class LiveGraphAdjList {
+//   using NbrT = LiveGraphNbr<VID_T, std::string_view>;
+
+//  public:
+//   LiveGraphAdjList() {}
+//   explict LiveGraphAdjList(std::unique_ptr<lg::EdgeIterator> edgeIterator)
+//       : edgeIterator_(std::move(edgeIterator)) {}
+//   ~LiveGraphAdjList() {}
+
+//   inline bool Empty() const { return !NotEmpty(); }
+
+//   inline bool NotEmpty() const { return edgeIterator.valid(); }
+
+//   inline size_t Size() const {
+//     LOG(INFO) << "Not implemented";
+//     return 0;
+//   }
+//   lg: begin(){return 1};
+//   int end() { return 1; }
+
+//  private:
+//   std::unique_ptr<gl::EdgeIterator> edgeIterator_;
+// };
 
 /**
  * @brief Destination list for message exchange. A message may need to be sent

@@ -147,7 +147,7 @@ else ()
             examples/analytical_apps)
     set_target_properties(analytical_apps PROPERTIES OUTPUT_NAME run_app)
     target_link_libraries(analytical_apps grape-lite ${MPI_CXX_LIBRARIES}
-            ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} ${CMAKE_DL_LIBS})
+            ${GLOG_LIBRARIES} ${GFLAGS_LIBRARIES} ${CMAKE_DL_LIBS} livegraph)
     install_libgrapelite_target(analytical_apps)
 endif ()
 

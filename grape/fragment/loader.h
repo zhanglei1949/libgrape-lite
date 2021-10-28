@@ -23,6 +23,8 @@ limitations under the License.
 #include "grape/fragment/ev_fragment_loader.h"
 #include "grape/fragment/partitioner.h"
 #include "grape/io/local_io_adaptor.h"
+#include "grape/util.h"
+#include "livegraph.hpp"
 
 namespace grape {
 /**
@@ -63,6 +65,22 @@ static std::shared_ptr<FRAG_T> LoadGraph(
                                     LINE_PARSER_T>(comm_spec));
     return loader->LoadFragment(efile, vfile, spec);
   }
+}
+
+template <typename FRAG_T>
+static std::<FRAG_T>LoadLiveGraph(
+    const CommSpec& comm_spec,
+    const LoadGraphSpec& spec = DefaultLoadGraphSpec()) {
+  livegraph::Graph graph;
+
+  auto txn = graph.begin_transaction();
+  CHECK(txn.new_vertex() == 0);
+  CHECK(txn.new_vertex() == 1);
+  CHECK(txn.new_vertex() == 2);
+
+  std::shared_ptr<LiveGraphWrapper> liveGraphWrapper =
+      std::shared_ptr<LiveGraphWrapper>(new LiveGraphWrapper(txn));
+  return LiveGraphWrapper;
 }
 
 }  // namespace grape

@@ -22,17 +22,15 @@ limitations under the License.
 #endif
 #endif
 
-#include <sys/time.h>
-
+#include <glog/logging.h>
 #include <stdio.h>
+#include <sys/time.h>
 
 #include <algorithm>
 #include <fstream>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <glog/logging.h>
 
 #include "grape/config.h"
 
@@ -101,6 +99,12 @@ void DistinctSort(std::vector<T>& vec) {
   }
   vec.resize(size - count);
 }
+
+template <typename, template <class...> class>
+struct is_instance : public std::false_type {};
+
+template <typename T, template <class...> class U>
+struct is_instace<U<T>, U> : public std::true_type {};
 
 }  // namespace grape
 

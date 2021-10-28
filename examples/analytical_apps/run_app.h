@@ -16,6 +16,15 @@ limitations under the License.
 #ifndef EXAMPLES_ANALYTICAL_APPS_RUN_APP_H_
 #define EXAMPLES_ANALYTICAL_APPS_RUN_APP_H_
 
+#include <gflags/gflags.h>
+#include <gflags/gflags_declare.h>
+#include <glog/logging.h>
+#include <grape/fragment/immutable_edgecut_fragment.h>
+#include <grape/fragment/livegraph_wrapper.h>
+#include <grape/fragment/loader.h>
+#include <grape/grape.h>
+#include <grape/util.h>
+
 #include <algorithm>
 #include <iostream>
 #include <memory>
@@ -24,15 +33,6 @@ limitations under the License.
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#include <grape/fragment/immutable_edgecut_fragment.h>
-#include <grape/fragment/loader.h>
-#include <grape/grape.h>
-#include <grape/util.h>
-
-#include <gflags/gflags.h>
-#include <gflags/gflags_declare.h>
-#include <glog/logging.h>
 
 #ifdef GRANULA
 #include "thirdparty/atlarge-research-granula/granula.hpp"
@@ -45,6 +45,7 @@ limitations under the License.
 #include "flags.h"
 #include "lcc/lcc.h"
 #include "lcc/lcc_auto.h"
+#include "livegraph/sssp_livegraph.h"
 #include "pagerank/pagerank.h"
 #include "pagerank/pagerank_auto.h"
 #include "pagerank/pagerank_local.h"
@@ -106,7 +107,10 @@ void CreateAndQuery(const CommSpec& comm_spec, const std::string efile,
     graph_spec.set_serialize(true, FLAGS_serialization_prefix);
   }
   std::shared_ptr<FRAG_T> fragment;
-  if (FLAGS_segmented_partition) {
+  if (is_instance<FRAG_T, LiveGraphWrapper>{}) {
+    LOG(INFO) << "Querying Live graph wrapper..";
+    fragment = LoadLiveGraph<FRAG_T>(comm_spec, graph_spec);
+  } else if (FLAGS_segmented_partition) {
     fragment = LoadGraph<FRAG_T, SegmentedPartitioner<typename FRAG_T::oid_t>>(
         efile, vfile, comm_spec, graph_spec);
   } else {
@@ -181,7 +185,14 @@ void Run() {
   }
   int fnum = comm_spec.fnum();
   std::string name = FLAGS_application;
-  if (name.find("sssp") != std::string::npos) {
+  if (name.find("livegraph") != std::string::npos) {
+    using GraphType = LiveGraphWrapper<OID_T, VID_T, VDATA_T, double>;
+    if (name == "livegraph_sssp") {
+      using AppType = SSSPLiveGraph<GraphType>;
+      CreateAndQuery<GraphType, AppType, OID_T>(
+          comm_spec, efile, vfile, out_prefix, fnum, spec, FLAGS_sssp_source);
+    }
+  } else if (name.find("sssp") != std::string::npos) {
     using GraphType = ImmutableEdgecutFragment<OID_T, VID_T, VDATA_T, double>;
     if (name == "sssp_auto") {
       using AppType = SSSPAuto<GraphType>;
