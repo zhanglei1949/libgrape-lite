@@ -38,6 +38,10 @@ template <typename FRAG_T>
 class SSSPLiveGraph
     : public ParallelAppBase<FRAG_T, SSSPLiveGraphContext<FRAG_T>>,
       public ParallelEngine {
+  static constexpr MessageStrategy message_strategy =
+      MessageStrategy::kAlongEdgeToOuterVertex;
+  static constexpr LoadStrategy load_strategy = LoadStrategy::kBothOutIn;
+
  public:
   // specialize the templated worker.
   INSTALL_PARALLEL_WORKER(SSSPLiveGraph<FRAG_T>, SSSPLiveGraphContext<FRAG_T>,
