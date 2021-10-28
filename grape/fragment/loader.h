@@ -71,12 +71,16 @@ template <typename FRAG_T>
 static std::shared_ptr<FRAG_T> LoadLiveGraph(
     const CommSpec& comm_spec,
     const LoadGraphSpec& spec = DefaultLoadGraphSpec()) {
-  std::unique_ptr<lg::Graph> graph = std::unique_ptr<lg::Graph>(new lg::Graph());
+  std::unique_ptr<lg::Graph> graph =
+      std::unique_ptr<lg::Graph>(new lg::Graph());
 
   auto txn = graph->begin_transaction();
   CHECK(txn.new_vertex() == 0);
   CHECK(txn.new_vertex() == 1);
   CHECK(txn.new_vertex() == 2);
+
+  CHECK(txn.put_edge(0, 0, 1, 1));
+  CHECK(txn.put_edge(0, 0, 2, 2));
 
   txn.commit();
   std::shared_ptr<FRAG_T> liveGraphWrapper =

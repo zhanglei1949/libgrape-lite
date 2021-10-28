@@ -17,6 +17,7 @@ limitations under the License.
 #define EXAMPLES_ANALYTICAL_APPS_SSSP_SSSP_LIVEGRAPH_H_
 
 #include <grape/grape.h>
+
 #include <charconv>
 #include <string>
 
@@ -73,11 +74,11 @@ class SSSPLiveGraph
       while (edgeIterator.valid()) {
         LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
         vertex_t v(edgeIterator.dst_id());
-	std::string_view edge_data = edgeIterator.edge_data();
-	int value;
-	std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(), value);
-        ctx.partial_result[v] =
-            std::min(ctx.partial_result[v], value);
+        std::string_view edge_data = edgeIterator.edge_data();
+        int value;
+        std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(),
+                        value);
+        ctx.partial_result[v] = std::min(ctx.partial_result[v], value);
         ctx.next_modified.Insert(v);
         edgeIterator.next();
       }

@@ -110,11 +110,17 @@ class LiveGraphWrapper {
 
   size_t GetTotalVerticesNum() { return 0; }
 
-  inline VertexRange<VID_T> Vertices() const { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> Vertices() const {
+    return VertexRange<VID_T>(0, 0);
+  }
 
-  inline VertexRange<VID_T> InnerVertices() const { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> InnerVertices() const {
+    return VertexRange<VID_T>(0, 0);
+  }
 
-  inline VertexRange<VID_T> OuterVertices() const { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> OuterVertices() const {
+    return VertexRange<VID_T>(0, 0);
+  }
 
   inline VertexRange<VID_T> OuterVertices(fid_t fid) const {
     return VertexRange<VID_T>(0, 0);
@@ -132,7 +138,7 @@ class LiveGraphWrapper {
   //     }
   //   }
   inline bool GetInnerVertex(const OID_T& oid, vertex_t& v) const {
-    v.SetValue((VID_T) 1);
+    v.SetValue((VID_T) 0);
     return true;
   }
 
@@ -173,7 +179,7 @@ class LiveGraphWrapper {
   // }
   lg::EdgeIterator GetEdgeIterator(const vertex_t& v) const {
     auto transaction = graph_->begin_transaction();
-    return transaction.get_edges(v.GetValue(), 0,false);
+    return transaction.get_edges(v.GetValue(), 0, false);
   }
 
  private:
