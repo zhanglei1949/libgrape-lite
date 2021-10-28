@@ -100,11 +100,11 @@ void DistinctSort(std::vector<T>& vec) {
   vec.resize(size - count);
 }
 
-template <typename, template <class...> class>
+template <class, template <class, class...> class>
 struct is_instance : public std::false_type {};
 
-template <typename T, template <class...> class U>
-struct is_instace<U<T>, U> : public std::true_type {};
+template <class...Ts, template <class, class...> class U>
+struct is_instance<U<Ts...>, U> : public std::true_type {};
 
 }  // namespace grape
 

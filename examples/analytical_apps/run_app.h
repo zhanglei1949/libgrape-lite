@@ -107,16 +107,47 @@ void CreateAndQuery(const CommSpec& comm_spec, const std::string efile,
     graph_spec.set_serialize(true, FLAGS_serialization_prefix);
   }
   std::shared_ptr<FRAG_T> fragment;
-  if (is_instance<FRAG_T, LiveGraphWrapper>{}) {
-    LOG(INFO) << "Querying Live graph wrapper..";
-    fragment = LoadLiveGraph<FRAG_T>(comm_spec, graph_spec);
-  } else if (FLAGS_segmented_partition) {
+  if (FLAGS_segmented_partition) {
     fragment = LoadGraph<FRAG_T, SegmentedPartitioner<typename FRAG_T::oid_t>>(
         efile, vfile, comm_spec, graph_spec);
   } else {
     fragment = LoadGraph<FRAG_T, HashPartitioner<typename FRAG_T::oid_t>>(
         efile, vfile, comm_spec, graph_spec);
   }
+  auto app = std::make_shared<APP_T>();
+  timer_next("load application");
+  auto worker = APP_T::CreateWorker(app, fragment);
+  worker->Init(comm_spec, spec);
+  timer_next("run algorithm");
+  worker->Query(std::forward<Args>(args)...);
+  timer_next("print output");
+
+  std::ofstream ostream;
+  std::string output_path =
+      grape::GetResultFilename(out_prefix, fragment->fid());
+  ostream.open(output_path);
+  worker->Output(ostream);
+  ostream.close();
+  worker->Finalize();
+  timer_end();
+  VLOG(1) << "Worker-" << comm_spec.worker_id() << " finished: " << output_path;
+}
+template <typename FRAG_T, typename APP_T, typename... Args>
+void CreateAndQueryPlus(const CommSpec& comm_spec, const std::string efile,
+                    const std::string& vfile, const std::string& out_prefix,
+                    int fnum, const ParallelEngineSpec& spec, Args... args) {
+  timer_next("load graph");
+  LoadGraphSpec graph_spec = DefaultLoadGraphSpec();
+  graph_spec.set_directed(FLAGS_directed);
+  graph_spec.set_rebalance(FLAGS_rebalance, FLAGS_rebalance_vertex_factor);
+  if (FLAGS_deserialize) {
+    graph_spec.set_deserialize(true, FLAGS_serialization_prefix);
+  } else if (FLAGS_serialize) {
+    graph_spec.set_serialize(true, FLAGS_serialization_prefix);
+  }
+  std::shared_ptr<FRAG_T> fragment;
+  LOG(INFO) << "Querying Live graph wrapper..";
+  fragment = LoadLiveGraph<FRAG_T>(comm_spec, graph_spec);
   auto app = std::make_shared<APP_T>();
   timer_next("load application");
   auto worker = APP_T::CreateWorker(app, fragment);
@@ -186,10 +217,10 @@ void Run() {
   int fnum = comm_spec.fnum();
   std::string name = FLAGS_application;
   if (name.find("livegraph") != std::string::npos) {
-    using GraphType = LiveGraphWrapper<OID_T, VID_T, VDATA_T, double>;
+    using GraphType = LiveGraphWrapper<OID_T, VID_T, VDATA_T, std::string_view>;
     if (name == "livegraph_sssp") {
       using AppType = SSSPLiveGraph<GraphType>;
-      CreateAndQuery<GraphType, AppType, OID_T>(
+      CreateAndQueryPlus<GraphType, AppType, OID_T>(
           comm_spec, efile, vfile, out_prefix, fnum, spec, FLAGS_sssp_source);
     }
   } else if (name.find("sssp") != std::string::npos) {

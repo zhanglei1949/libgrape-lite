@@ -30,20 +30,20 @@ namespace grape {
  * @tparam FRAG_T
  */
 template <typename FRAG_T>
-class SSSPLiveGraphContext : public VertexDataContext<FRAG_T, double> {
+class SSSPLiveGraphContext : public VertexDataContext<FRAG_T, int> {
  public:
   using oid_t = typename FRAG_T::oid_t;
   using vid_t = typename FRAG_T::vid_t;
 
   explicit SSSPLiveGraphContext(const FRAG_T& fragment)
-      : VertexDataContext<FRAG_T, double>(fragment, true),
+      : VertexDataContext<FRAG_T, int>(fragment, true),
         partial_result(this->data()) {}
 
   void Init(ParallelMessageManager& messages, oid_t source_id) {
     auto& frag = this->fragment();
 
     this->source_id = source_id;
-    partial_result.SetValue(std::numeric_limits<double>::max());
+    partial_result.SetValue(std::numeric_limits<int>::max());
     curr_modified.Init(frag.Vertices());
     next_modified.Init(frag.Vertices());
   }
@@ -55,18 +55,18 @@ class SSSPLiveGraphContext : public VertexDataContext<FRAG_T, double> {
     auto& frag = this->fragment();
     auto inner_vertices = frag.InnerVertices();
     for (auto v : inner_vertices) {
-      double d = partial_result[v];
-      if (d == std::numeric_limits<double>::max()) {
-        os << frag.GetId(v) << " infinity" << std::endl;
+      int d = partial_result[v];
+      if (d == std::numeric_limits<int>::max()) {
+        os << v.GetValue() << " infinity" << std::endl;
       } else {
-        os << frag.GetId(v) << " " << std::scientific << std::setprecision(15)
+        os << v.GetValue() << " " << std::scientific << std::setprecision(15)
            << d << std::endl;
       }
     }
   }
 
   oid_t source_id;
-  typename FRAG_T::template vertex_array_t<double>& partial_result;
+  typename FRAG_T::template vertex_array_t<int>& partial_result;
 
   DenseVertexSet<vid_t> curr_modified, next_modified;
 };

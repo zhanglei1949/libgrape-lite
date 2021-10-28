@@ -62,17 +62,17 @@ class LiveGraphWrapper {
   using vdata_t = VDATA_T;
   using edata_t = EDATA_T;
   // using vertex_range_t = VertexRange<vid_t>;
-  // template <typename DATA_T>
-  // using vertex_array_t = VertexArray<DATA_T, vid_t>;
+  template <typename DATA_T>
+  using vertex_array_t = VertexArray<DATA_T, vid_t>;
   // using vertex_map_t = GlobalVertexMap<oid_t, vid_t>;
 
   // using IsEdgeCut = std::true_type;
   // using IsVertexCut = std::false_type;
-
+  static constexpr LoadStrategy load_strategy = _load_strategy;
   LiveGraphWrapper() = default;
 
-  explicit LiveGraphWrapper(std::unique_ptr<lg::Transaction> transaction)
-      : transaction_(std::move(transaction)) {}
+  explicit LiveGraphWrapper(std::unique_ptr<lg::Graph> graph)
+      : graph_(std::move(graph)) {}
 
   virtual ~LiveGraphWrapper() = default;
 
@@ -110,11 +110,11 @@ class LiveGraphWrapper {
 
   size_t GetTotalVerticesNum() { return 0; }
 
-  inline VertexRange<VID_T> Vertices() { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> Vertices() const { return VertexRange<VID_T>(0, 0); }
 
-  inline VertexRange<VID_T> InnerVertices() { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> InnerVertices() const { return VertexRange<VID_T>(0, 0); }
 
-  inline VertexRange<VID_T> OuterVertices() { return VertexRange<VID_T>(0, 0); }
+  inline VertexRange<VID_T> OuterVertices() const { return VertexRange<VID_T>(0, 0); }
 
   inline VertexRange<VID_T> OuterVertices(fid_t fid) const {
     return VertexRange<VID_T>(0, 0);
@@ -131,14 +131,14 @@ class LiveGraphWrapper {
   //       return false;
   //     }
   //   }
-  inline bool GetInnerVertex(const OID_T& oid, vertex_t& v) {
+  inline bool GetInnerVertex(const OID_T& oid, vertex_t& v) const {
     v.SetValue((VID_T) 1);
     return true;
   }
 
-  inline int GetLocalOutDegree(const vertex_t& v) { return 0; }
+  inline int GetLocalOutDegree(const vertex_t& v) const { return 0; }
 
-  inline int GetLocalInDegree(const vertex_t& v) { return 0; }
+  inline int GetLocalInDegree(const vertex_t& v) const { return 0; }
 
   inline VID_T GetInnerVerticesNum() { return 0; }
 
@@ -171,12 +171,13 @@ class LiveGraphWrapper {
   //   // return adj_list_t(oeoffset_[v.GetValue()], oeoffset_[v.GetValue() +
   //   1]); return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
   // }
-  lg::EdgeIterator GetEdgeIterator(const vertex_t& v) {
-    return transaction_.get_edges(v.GetValue(), 0);
+  lg::EdgeIterator GetEdgeIterator(const vertex_t& v) const {
+    auto transaction = graph_->begin_transaction();
+    return transaction.get_edges(v.GetValue(), 0,false);
   }
 
  private:
-  std::unique_ptr<lg::Transaction> transaction_;
+  std::unique_ptr<lg::Graph> graph_;
 };
 }  // namespace grape
 

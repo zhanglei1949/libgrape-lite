@@ -68,19 +68,20 @@ static std::shared_ptr<FRAG_T> LoadGraph(
 }
 
 template <typename FRAG_T>
-static std::<FRAG_T>LoadLiveGraph(
+static std::shared_ptr<FRAG_T> LoadLiveGraph(
     const CommSpec& comm_spec,
     const LoadGraphSpec& spec = DefaultLoadGraphSpec()) {
-  livegraph::Graph graph;
+  std::unique_ptr<lg::Graph> graph = std::unique_ptr<lg::Graph>(new lg::Graph());
 
-  auto txn = graph.begin_transaction();
+  auto txn = graph->begin_transaction();
   CHECK(txn.new_vertex() == 0);
   CHECK(txn.new_vertex() == 1);
   CHECK(txn.new_vertex() == 2);
 
-  std::shared_ptr<LiveGraphWrapper> liveGraphWrapper =
-      std::shared_ptr<LiveGraphWrapper>(new LiveGraphWrapper(txn));
-  return LiveGraphWrapper;
+  txn.commit();
+  std::shared_ptr<FRAG_T> liveGraphWrapper =
+      std::shared_ptr<FRAG_T>(new FRAG_T(std::move(graph)));
+  return liveGraphWrapper;
 }
 
 }  // namespace grape

@@ -17,6 +17,8 @@ limitations under the License.
 #define EXAMPLES_ANALYTICAL_APPS_SSSP_SSSP_LIVEGRAPH_H_
 
 #include <grape/grape.h>
+#include <charconv>
+#include <string>
 
 #include "livegraph.hpp"
 #include "livegraph/sssp_livegraph_contex.h"
@@ -38,11 +40,11 @@ template <typename FRAG_T>
 class SSSPLiveGraph
     : public ParallelAppBase<FRAG_T, SSSPLiveGraphContext<FRAG_T>>,
       public ParallelEngine {
+ public:
   static constexpr MessageStrategy message_strategy =
       MessageStrategy::kAlongEdgeToOuterVertex;
   static constexpr LoadStrategy load_strategy = LoadStrategy::kBothOutIn;
 
- public:
   // specialize the templated worker.
   INSTALL_PARALLEL_WORKER(SSSPLiveGraph<FRAG_T>, SSSPLiveGraphContext<FRAG_T>,
                           FRAG_T)
@@ -67,13 +69,15 @@ class SSSPLiveGraph
 
     if (native_source) {
       ctx.partial_result[source] = 0;
-      gl::EdgeIterator edgeIterator = frag.GetEdgeIterator(source);
+      lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(source);
       while (edgeIterator.valid()) {
         LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
-        vertex_t v = edgeIterator.dst_id();
+        vertex_t v(edgeIterator.dst_id());
+	std::string_view edge_data = edgeIterator.edge_data();
+	int value;
+	std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(), value);
         ctx.partial_result[v] =
-            std::min(ctx.partial_result[v],
-                     static_cast<double>(edgeIterator.edge_data()));
+            std::min(ctx.partial_result[v], value);
         ctx.next_modified.Insert(v);
         edgeIterator.next();
       }
