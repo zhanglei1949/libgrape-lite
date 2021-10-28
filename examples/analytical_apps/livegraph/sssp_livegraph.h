@@ -65,12 +65,14 @@ class SSSPLiveGraph
 
     vertex_t source;
     bool native_source = frag.GetInnerVertex(ctx.source_id, source);
+    LOG(INFO) << "Source " << source.GetValue();
 
     ctx.next_modified.ParallelClear(GetThreadPool());
-
+    LOG(INFO) << "before if";
     if (native_source) {
       ctx.partial_result[source] = 0;
       lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(source);
+      LOG(INFO) << "edge iterator: ,valid:" <<edgeIterator.valid();
       while (edgeIterator.valid()) {
         LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
         vertex_t v(edgeIterator.dst_id());
