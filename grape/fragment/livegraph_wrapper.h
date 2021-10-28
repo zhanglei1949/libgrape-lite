@@ -47,7 +47,8 @@ namespace grape {
 class CommSpec;
 class OutArchive;
 
-template <typename OID_T, typename VID_T, typename VDATA_T, typename EDATA_T>
+template <typename OID_T, typename VID_T, typename VDATA_T, typename EDATA_T,
+          LoadStrategy _load_strategy = LoadStrategy::kBothOutIn>
 class LiveGraphWrapper {
  public:
   using internal_vertex_t = internal::Vertex<VID_T, VDATA_T>;
