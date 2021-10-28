@@ -170,12 +170,12 @@ class LiveGraphWrapper {
   //   // return adj_list_t(oeoffset_[v.GetValue()], oeoffset_[v.GetValue() +
   //   1]); return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
   // }
-  gl::EdgeIterator GetEdgeIterator(const vertex_t& v) {
+  lg::EdgeIterator GetEdgeIterator(const vertex_t& v) {
     return transaction_.get_edges(v.GetValue(), 0);
   }
 
  private:
-  std::unique_ptr<gl::Transaction> transaction_;
+  std::unique_ptr<lg::Transaction> transaction_;
 };
 }  // namespace grape
 
