@@ -2,7 +2,7 @@
 Running PIE algorithm on data store in livegraph.
 
 # branches
-[zhanglei/libgrape-lite](https://github.com/zhanglei1949/libgrape-lite)
+[zhanglei/libgrape-lite](https://github.com/zhanglei1949/libgrape-lite/tree/livegraph-api)
 
 [zhanglei/livegraph](https://github.com/zhanglei1949/LiveGraph)
 
