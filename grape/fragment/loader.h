@@ -79,8 +79,8 @@ static std::shared_ptr<FRAG_T> LoadLiveGraph(
   CHECK(txn.new_vertex() == 1);
   CHECK(txn.new_vertex() == 2);
 
-  CHECK(txn.put_edge(0, 0, 1, 1));
-  CHECK(txn.put_edge(0, 0, 2, 2));
+  txn.put_edge(0, 0, 1, "1");
+  txn.put_edge(0, 0, 2, "2");
 
   txn.commit();
   std::shared_ptr<FRAG_T> liveGraphWrapper =
