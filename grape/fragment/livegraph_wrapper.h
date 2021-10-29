@@ -72,8 +72,8 @@ class LiveGraphWrapper {
   LiveGraphWrapper() = default;
 
   explicit LiveGraphWrapper(std::unique_ptr<lg::Graph> graph)
-      : graph_(std::move(graph)) {
-    transaction_ = graph_->begin_transaction();
+      : graph_(std::move(graph)){
+	LOG(INFO) << "after construct graph wrapper " ;
   }
 
   virtual ~LiveGraphWrapper() = default;
@@ -95,17 +95,29 @@ class LiveGraphWrapper {
     //   initEdgesSplitter(oeoffset_, oespliters_);
     // }
   }
+  inline fid_t fid() const { return 0; }
 
-  inline size_t GetEdgeNum() { return 0; }
+  inline size_t GetEdgeNum() const { return 0; }
 
-  inline VID_T GetMaxVertexID() { return transaction_.get_max_vid(); }
-
-  size_t GetVerticesNum() { return transaction_.get_vertex_num(); }
-
-  inline VertexRange<VID_T> Vertices() const {
-    return VertexRange<VID_T>(0, transaction_.get_max_vid());
+  inline VID_T GetMaxVertexID() const {
+    auto transaction = graph_->begin_transaction();
+    return transaction.get_max_vid();
   }
 
+  size_t GetVerticesNum() const {
+    auto transaction = graph_->begin_transaction();
+    return transaction.get_vertex_num();
+  }
+
+  inline VertexRange<VID_T> Vertices() const {
+    auto transaction = graph_->begin_transaction();
+    return VertexRange<VID_T>(0, transaction.get_max_vid());
+  }
+
+  inline VertexRange<VID_T> InnerVertices() const {
+    auto transaction = graph_->begin_transaction();
+    return VertexRange<VID_T>(0, transaction.get_max_vid());
+  }
   // inline bool GetInnerVertex(const OID_T& oid, vertex_t& v) const {
   //   v.SetValue((VID_T) 0);
   //   return true;
@@ -141,12 +153,13 @@ class LiveGraphWrapper {
   //   1]); return adj_list_t(transaction_.get_edges(v.GetValue(), 0));
   // }
   lg::EdgeIterator GetEdgeIterator(const vertex_t& v) const {
-    return transaction_.get_edges(v.GetValue(), 0, false);
+    auto transaction = graph_->begin_transaction();
+    return transaction.get_edges(v.GetValue(), 0, false);
   }
 
  private:
   std::unique_ptr<lg::Graph> graph_;
-  lg::Transaction transaction_;
+//  lg::Transaction transaction_;
 };
 }  // namespace grape
 

@@ -53,8 +53,8 @@ class SSSPLiveGraphContext : public VertexDataContext<FRAG_T, int> {
     // then the vertex is not connected to the source vertex.
     // According to specs, the output should be +inf
     auto& frag = this->fragment();
-    auto inner_vertices = frag.InnerVertices();
-    for (auto v : inner_vertices) {
+    auto vertices = frag.Vertices();
+    for (auto v : vertices) {
       int d = partial_result[v];
       if (d == std::numeric_limits<int>::max()) {
         os << v.GetValue() << " infinity" << std::endl;

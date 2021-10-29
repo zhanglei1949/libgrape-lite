@@ -60,7 +60,6 @@ class SSSPLiveGraph
    */
   void PEval(const fragment_t& frag, context_t& ctx,
              message_manager_t& messages) {
-    auto inner_vertices = frag.InnerVertices();
     messages.InitChannels(thread_num());
 
     vertex_t source(ctx.source_id);
