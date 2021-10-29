@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef EXAMPLES_ANALYTICAL_APPS_SSSP_SSSP_LIVEGRAPH_H_
-#define EXAMPLES_ANALYTICAL_APPS_SSSP_SSSP_LIVEGRAPH_H_
+#ifndef EXAMPLES_ANALYTICAL_APPS_LIVEGRAPH_SSSP_LIVEGRAPH_H_
+#define EXAMPLES_ANALYTICAL_APPS_LIVEGRAPH_SSSP_LIVEGRAPH_H_
 
 #include <grape/grape.h>
 
@@ -63,27 +63,27 @@ class SSSPLiveGraph
     auto inner_vertices = frag.InnerVertices();
     messages.InitChannels(thread_num());
 
-    vertex_t source;
-    bool native_source = frag.GetInnerVertex(ctx.source_id, source);
+    vertex_t source(ctx.source_id);
+    // bool native_source = frag.GetInnerVertex(ctx.source_id, source);
 
     ctx.next_modified.ParallelClear(GetThreadPool());
 
-    if (native_source) {
-      ctx.partial_result[source] = 0;
-      lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(source);
-      while (edgeIterator.valid()) {
-        LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
-        vertex_t v(edgeIterator.dst_id());
-        std::string_view edge_data = edgeIterator.edge_data();
-        int value;
-        std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(),
-                        value);
-        ctx.partial_result[v] = std::min(ctx.partial_result[v], value);
-        ctx.next_modified.Insert(v);
-        edgeIterator.next();
-      }
+    ctx.partial_result[source] = 0;
+    lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(source);
+    while (edgeIterator.valid()) {
+      LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
+      vertex_t v(edgeIterator.dst_id());
+      std::string_view edge_data = edgeIterator.edge_data();
+      int value;
+      std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(),
+                      value);
+      ctx.partial_result[v] = std::min(ctx.partial_result[v], value);
+      ctx.next_modified.Insert(v);
+      edgeIterator.next();
     }
+
     messages.ForceContinue();
+    ctx.next_modified.Swap(ctx.curr_modified);
   }
 
   /**
@@ -95,10 +95,33 @@ class SSSPLiveGraph
    */
   void IncEval(const fragment_t& frag, context_t& ctx,
                message_manager_t& messages) {
-    LOG(INFO) << "No inc for SSSP livegraph.";
+    if (ctx.curr_modified.Empty()) {
+      return;
+    }
+    auto vertices = frag.Vertices();
+
+    // incremental evaluation.
+    ForEach(ctx.curr_modified, vertices, [&frag, &ctx](int tid, vertex_t u) {
+      double distu = ctx.partial_result[u];
+      lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(u);
+      while (edgeIterator.valid()) {
+        LOG(INFO) << edgeIterator.dst_id() << ":" << edgeIterator.edge_data();
+        vertex_t v(edgeIterator.dst_id());
+        std::string_view edge_data = edgeIterator.edge_data();
+        int value;
+        std::from_chars(edge_data.data(), edge_data.data() + edge_data.size(),
+                        value);
+        int distv = distu + value;
+        if (distv < ctx.partial_result[v]) {
+          atomic_min(ctx.partial_result[v], distv);
+          ctx.next_modified.Insert(v);
+        }
+        edgeIterator.next();
+      }
+    });
   }
 };
 
 }  // namespace grape
 
-#endif  // EXAMPLES_ANALYTICAL_APPS_SSSP_SSSP_LIVEGRAPH_H_
+#endif  // EXAMPLES_ANALYTICAL_APPS_LIVEGRAPH_SSSP_LIVEGRAPH_H_

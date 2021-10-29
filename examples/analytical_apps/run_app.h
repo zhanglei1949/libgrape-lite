@@ -45,6 +45,7 @@ limitations under the License.
 #include "flags.h"
 #include "lcc/lcc.h"
 #include "lcc/lcc_auto.h"
+#include "livegraph/pagerank_livegraph.h"
 #include "livegraph/sssp_livegraph.h"
 #include "pagerank/pagerank.h"
 #include "pagerank/pagerank_auto.h"
@@ -134,8 +135,9 @@ void CreateAndQuery(const CommSpec& comm_spec, const std::string efile,
 }
 template <typename FRAG_T, typename APP_T, typename... Args>
 void CreateAndQueryPlus(const CommSpec& comm_spec, const std::string efile,
-                    const std::string& vfile, const std::string& out_prefix,
-                    int fnum, const ParallelEngineSpec& spec, Args... args) {
+                        const std::string& vfile, const std::string& out_prefix,
+                        int fnum, const ParallelEngineSpec& spec,
+                        Args... args) {
   timer_next("load graph");
   LoadGraphSpec graph_spec = DefaultLoadGraphSpec();
   graph_spec.set_directed(FLAGS_directed);
@@ -222,6 +224,11 @@ void Run() {
       using AppType = SSSPLiveGraph<GraphType>;
       CreateAndQueryPlus<GraphType, AppType, OID_T>(
           comm_spec, efile, vfile, out_prefix, fnum, spec, FLAGS_sssp_source);
+    } else if (name == "livegraph_pagerank") {
+      using AppType = PageRankLiveGraph<GraphType>;
+      CreateAndQueryPlus<GraphType, AppType, OID_T>(comm_spec, efile, vfile,
+                                                    out_prefix, fnum, spec,
+                                                    FLAGS_pr_d, FLAGS_pr_mr);
     }
   } else if (name.find("sssp") != std::string::npos) {
     using GraphType = ImmutableEdgecutFragment<OID_T, VID_T, VDATA_T, double>;
