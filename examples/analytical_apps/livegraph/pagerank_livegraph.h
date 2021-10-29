@@ -62,7 +62,7 @@ class PageRankLiveGraph
     // assign initial ranks
     ForEach(vertices, [&ctx, &frag, p, &messages](int tid, vertex_t u) {
       lg::EdgeIterator edgeIterator = frag.GetEdgeIterator(u);
-      int EdgeNum = edgeIterator.Size();
+      int EdgeNum = edgeIterator.size();
       // int EdgeNum = frag.GetOutgoingAdjList(u).Size();
       ctx.degree[u] = EdgeNum;
       if (EdgeNum > 0) {
@@ -88,11 +88,11 @@ class PageRankLiveGraph
   void IncEval(const fragment_t& frag, context_t& ctx,
                message_manager_t& messages) {
     auto vertices = frag.Vertices();
-
     double dangling_sum = ctx.dangling_sum;
 
     size_t graph_vnum = frag.GetVerticesNum();
 
+    LOG(INFO) << "vertices.size()" << vertices.size() << " verticesNum " <<graph_vnum;
     ++ctx.step;
     if (ctx.step > ctx.max_round) {
       auto& degree = ctx.degree;

@@ -32,7 +32,7 @@ class PageRankLiveGraphContext : public VertexDataContext<FRAG_T, double> {
   using vid_t = typename FRAG_T::vid_t;
 
  public:
-  explicit PageRankParallelContext(const FRAG_T& fragment)
+  explicit PageRankLiveGraphContext(const FRAG_T& fragment)
       : VertexDataContext<FRAG_T, double>(fragment, true),
         result(this->data()) {}
 
@@ -52,7 +52,7 @@ class PageRankLiveGraphContext : public VertexDataContext<FRAG_T, double> {
     auto& frag = this->fragment();
     auto vertices = frag.Vertices();
     for (auto v : vertices) {
-      os << frag.GetId(v) << " " << std::scientific << std::setprecision(15)
+      os << v.GetValue() << " " << std::scientific << std::setprecision(15)
          << result[v] << std::endl;
     }
   }

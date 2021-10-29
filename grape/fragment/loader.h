@@ -74,17 +74,36 @@ static std::shared_ptr<FRAG_T> LoadLiveGraph(
   std::unique_ptr<lg::Graph> graph =
       std::unique_ptr<lg::Graph>(new lg::Graph());
 
+{
   auto txn = graph->begin_transaction();
   CHECK(txn.new_vertex() == 0);
   CHECK(txn.new_vertex() == 1);
   CHECK(txn.new_vertex() == 2);
-
-  txn.put_edge(0, 0, 1, "1");
-  txn.put_edge(0, 0, 2, "2");
-
+  txn.put_vertex(0, "0");
+  txn.put_vertex(1, "1");
+  txn.put_vertex(2, "2");
   txn.commit();
+}
+{
+  auto txn = graph->begin_transaction();
+  CHECK(txn.del_vertex(0));
+  CHECK(txn.new_vertex() == 3);
+  LOG(INFO) << "add vertices";
+  txn.commit();
+}
+{
+  auto txn = graph->begin_transaction();
+  txn.put_edge(3, 0, 1, "1");
+  txn.put_edge(3, 0, 2, "2");
+  txn.del_edge(3, 0, 1);
+  txn.put_edge(3, 0, 1, "11");
+  LOG(INFO) << "add edges";
+  txn.commit();
+}
+
   std::shared_ptr<FRAG_T> liveGraphWrapper =
       std::shared_ptr<FRAG_T>(new FRAG_T(std::move(graph)));
+  LOG(INFO) << "got wrapper";
   return liveGraphWrapper;
 }
 
